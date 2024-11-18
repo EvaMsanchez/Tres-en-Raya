@@ -9,9 +9,16 @@ import { WinnerModal } from "./components/WinnerModal.jsx"
 
 function App() 
 {
-  const [board, setBoard] = useState(Array(9).fill(null))
+  // Comprobamos antes si está la partida guardada sino se devuelve inicializado a null las casillas
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    return boardFromStorage ? JSON.parse(boardFromStorage) : Array(9).fill(null)
+  })
 
-  const [turn, setTurn] = useState(TURNS.X)
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+    return turnFromStorage ?? TURNS.X  // ?? comprueba si es null o false
+  })  
 
   // null: no hay ganador ni empate, false: hay un empate
   const [winner, setWinner] = useState(null)
@@ -22,6 +29,10 @@ function App()
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+
+    // También reseteamos el localStorage
+    window.localStorage.removeItem('board')
+    window.localStorage.removeItem('turn')
   }
 
   // Actualizar el tablero
@@ -37,6 +48,10 @@ function App()
     // Cambiar el turno
     const newTurn = turn == TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    // Guardar la partida (guardamos el nuevo tablero y el turno)
+    window.localStorage.setItem('board', JSON.stringify(newBoard)) // convertirlo a string
+    window.localStorage.setItem('turn', newTurn)
 
     // Revisar si hay ganador
     const newWinner = checkWinnerFrom(newBoard)
